@@ -8,6 +8,7 @@
     private $menorValor = INF;
     private $maiorValor = -INF;
     private $media = 0;
+    private $maiores = 0;
 
     function __construct()
     {
@@ -25,7 +26,23 @@
         }
         $total += $lance->getValor();
       }
+      $this->pegaOsMaioresNo($leilao);
       $this->media = $total / count($leilao->getLances());
+    }
+
+    public function pegaOsMaioresNo(Leilao $leilao) {
+
+          $lances = $leilao->getLances();
+          usort($lances,function ($a,$b) {
+              if($a->getValor() == $b->getValor()) return 0;
+              return ($a->getValor() < $b->getValor()) ? 1 : -1;
+          });
+
+          $this->maiores = array_slice($lances, 0,3);
+    }
+
+    public function getTresMaiores() {
+        return $this->maiores;
     }
 
     public function getMedia(){
