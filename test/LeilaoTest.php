@@ -41,5 +41,30 @@ class LeilaoTest extends PHPUnit_Framework_TestCase {
     $ultimo = count($leilao->getLances())- 1;
     $this->assertEquals(10000, $leilao->getLances()[$ultimo]->getValor());
   }
+
+  public function testDobrarLanceUsuarioContendoLanceAnterior(){
+    $leilao = new Leilao("Macbook caro");
+    $joao = new Usuario("Joao");
+    $jonas = new Usuario("Jonas");
+
+    $leilao->propoe(new Lance($joao, 1000));
+    $leilao->propoe(new Lance($jonas, 1500));
+    $leilao->dobraLance($joao);
+
+    $this->assertEquals(3, count($leilao->getLances()));
+    $this->assertEquals(2000, $leilao->getLances()[2]->getValor());
+  }
+
+  public function testNaoDeveDobrarCasoNaoHajaLanceAnterior(){
+    $leilao = new Leilao("Macbook caro");
+    $joao = new Usuario("Joao");
+    $jonas = new Usuario("Jonas");
+
+    $leilao->propoe(new Lance($jonas, 1500));
+    $leilao->dobraLance($joao);
+
+    $this->assertEquals(1, count($leilao->getLances()));
+    $this->assertEquals(1500, $leilao->getLances()[0]->getValor());
+  }
 }
 ?>
