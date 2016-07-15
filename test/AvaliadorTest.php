@@ -4,32 +4,53 @@ require_once("../Avaliador.php");
 require_once("../Lance.php");
 require_once("../Leilao.php");
 require_once("../Usuario.php");
+require_once("../CriadorDeLeilao.php");
 
 class AvaliadorTest extends PHPUnit_Framework_TestCase{
+
+  private $leiloeiro;
+  private $jonas;
+  private $joao;
+  private $jorge;
+  private $criador;
+
+  public function setUp(){
+    $this->leiloeiro = new Avaliador();
+    $this->jonas = new Usuario("Jonas");
+    $this->joao = new Usuario("João");
+    $this->jorge = new Usuario("Jorge");
+    $this->criador = new CriadorDeLeilao();
+  }
+
+  public function tearDown() {
+    //destroy
+  }
+
+  public static function setUpBeforeClass() {
+    //var_dump("before class");
+  }
+
+  public static function testandoAfterClass() {
+    //var_dump("after class");
+  }
 
   public function testAceitaLeilaoEmOrdemCrescente(){
 
     $maiorEsperado = 400;
     $menorEsperado = 250;
     $mediaEsperada = 316.66666666666669;
-    $leilao = new Leilao("Playstation");
 
+    $leilao = $this->criador->para("Playstation")
+            ->lance($this->jonas, 250)
+            ->lance($this->joao, 300)
+            ->lance($this->jorge, 400)
+            ->constroi();
 
-    $jonas = new Usuario("jonas",1);
-    $joao  = new Usuario("joao",2);
-    $jorge = new Usuario("jorge",3);
+    $this->leiloeiro->avalia($leilao);
 
-    $leilao->propoe(new Lance($jonas, 250));
-    $leilao->propoe(new Lance($joao, 300));
-    $leilao->propoe(new Lance($jorge, 400));
-
-
-    $leiloeiro = new Avaliador();
-    $leiloeiro->avalia($leilao);
-
-    $this->assertEquals($maiorEsperado, $leiloeiro->getMaiorLance());
-    $this->assertEquals($menorEsperado, $leiloeiro->getMenorLance());
-    $this->assertEquals($mediaEsperada, $leiloeiro->getMedia(), 0.00001);
+    $this->assertEquals($maiorEsperado, $this->leiloeiro->getMaiorLance());
+    $this->assertEquals($menorEsperado, $this->leiloeiro->getMenorLance());
+    $this->assertEquals($mediaEsperada, $this->leiloeiro->getMedia(), 0.00001);
   }
 
   public function testAceitaLeilaoEmOrdemDecrescente(){
@@ -37,23 +58,17 @@ class AvaliadorTest extends PHPUnit_Framework_TestCase{
     $maiorEsperado = 400;
     $menorEsperado = 100;
 
-    $leilao = new Leilao("Playstation");
+    $leilao = $this->criador->para("Playstation")
+            ->lance($this->jonas, 400)
+            ->lance($this->joao, 300)
+            ->lance($this->jorge, 200)
+            ->lance($this->jonas, 100)
+            ->constroi();
 
-    $jonas = new Usuario("jonas",1);
-    $joao  = new Usuario("joao",2);
-    $jorge = new Usuario("jorge",3);
+    $this->leiloeiro->avalia($leilao);
 
-    $leilao->propoe(new Lance($jonas, 400));
-    $leilao->propoe(new Lance($joao, 300));
-    $leilao->propoe(new Lance($jorge, 200));
-    $leilao->propoe(new Lance($jonas, 100));
-
-
-    $leiloeiro = new Avaliador();
-    $leiloeiro->avalia($leilao);
-
-    $this->assertEquals($maiorEsperado, $leiloeiro->getMaiorLance(), 0.0001);
-    $this->assertEquals($menorEsperado, $leiloeiro->getMenorLance(), 0.0001);
+    $this->assertEquals($maiorEsperado, $this->leiloeiro->getMaiorLance(), 0.0001);
+    $this->assertEquals($menorEsperado, $this->leiloeiro->getMenorLance(), 0.0001);
   }
 
   public function testAceitaLeilaoComApenasUmLance(){
@@ -61,15 +76,14 @@ class AvaliadorTest extends PHPUnit_Framework_TestCase{
     $maiorEsperado = 200;
     $menorEsperado = 200;
 
-    $leilao = new Leilao("Playstation");
-    $jonas = new Usuario("jonas",1);
-    $leilao->propoe(new Lance($jonas, 200));
+    $leilao = $this->criador->para("Playstation")
+            ->lance($this->jonas, 200)
+            ->constroi();
 
-    $leiloeiro = new Avaliador();
-    $leiloeiro->avalia($leilao);
+    $this->leiloeiro->avalia($leilao);
 
-    $this->assertEquals($maiorEsperado, $leiloeiro->getMaiorLance(), 0.0001);
-    $this->assertEquals($menorEsperado, $leiloeiro->getMenorLance(), 0.0001);
+    $this->assertEquals($maiorEsperado, $this->leiloeiro->getMaiorLance(), 0.0001);
+    $this->assertEquals($menorEsperado, $this->leiloeiro->getMenorLance(), 0.0001);
   }
 
   public function testAceitaLeilaoComValoresAleatorios(){
@@ -77,25 +91,20 @@ class AvaliadorTest extends PHPUnit_Framework_TestCase{
     $maiorEsperado = 700;
     $menorEsperado = 120;
 
-    $leilao = new Leilao("Playstation");
+    $leilao = $this->criador->para("Playstation")
+            ->lance($this->jonas, 200)
+            ->lance($this->joao, 450)
+            ->lance($this->jorge, 120)
+            ->lance($this->jonas, 700)
+            ->lance($this->joao, 630)
+            ->lance($this->jorge, 230)
+            ->constroi();
 
-    $jonas = new Usuario("jonas",1);
-    $joao  = new Usuario("joao",2);
-    $jorge = new Usuario("jorge",3);
 
-    $leilao->propoe(new Lance($jonas, 200));
-    $leilao->propoe(new Lance($joao, 450));
-    $leilao->propoe(new Lance($jorge, 120));
+    $this->leiloeiro->avalia($leilao);
 
-    $leilao->propoe(new Lance($jonas, 700));
-    $leilao->propoe(new Lance($joao, 630));
-    $leilao->propoe(new Lance($jorge, 230));
-
-    $leiloeiro = new Avaliador();
-    $leiloeiro->avalia($leilao);
-
-    $this->assertEquals($maiorEsperado, $leiloeiro->getMaiorLance(), 0.0001);
-    $this->assertEquals($menorEsperado, $leiloeiro->getMenorLance(), 0.0001);
+    $this->assertEquals($maiorEsperado, $this->leiloeiro->getMaiorLance(), 0.0001);
+    $this->assertEquals($menorEsperado, $this->leiloeiro->getMenorLance(), 0.0001);
   }
 
 
@@ -105,23 +114,18 @@ class AvaliadorTest extends PHPUnit_Framework_TestCase{
     $maiorEsperado2 = 600;
     $maiorEsperado3 = 500;
 
-    $leilao = new Leilao("Playstation");
+    $leilao = $this->criador->para("Playstation")
+            ->lance($this->jonas, 700)
+            ->lance($this->joao, 600)
+            ->lance($this->jorge, 500)
+            ->lance($this->jonas, 400)
+            ->lance($this->joao, 300)
+            ->lance($this->jorge, 200)
+            ->constroi();
 
-    $jonas = new Usuario("jonas",1);
-    $joao  = new Usuario("joao",2);
-    $jorge = new Usuario("jorge",3);
 
-    $leilao->propoe(new Lance($jonas, 700));
-    $leilao->propoe(new Lance($joao, 600));
-    $leilao->propoe(new Lance($jorge, 500));
-
-    $leilao->propoe(new Lance($jonas, 400));
-    $leilao->propoe(new Lance($joao, 300));
-    $leilao->propoe(new Lance($jorge, 200));
-
-    $leiloeiro = new Avaliador();
-    $leiloeiro->pegaOsMaioresNo($leilao);
-    $maiores = $leiloeiro->getTresMaiores();
+    $this->leiloeiro->pegaOsMaioresNo($leilao);
+    $maiores = $this->leiloeiro->getTresMaiores();
 
     $this->assertEquals($maiorEsperado1, $maiores[0]->getValor(), 0.0001);
     $this->assertEquals($maiorEsperado2, $maiores[1]->getValor(), 0.0001);
@@ -134,32 +138,27 @@ class AvaliadorTest extends PHPUnit_Framework_TestCase{
     $maiorEsperado1 = 700;
     $maiorEsperado2 = 500;
 
-    $leilao = new Leilao("Playstation");
+    $leilao = $this->criador->para("Playstation")
+            ->lance($this->jonas, 700)
+            ->lance($this->jorge, 500)
+            ->constroi();
 
-    $jonas = new Usuario("jonas",1);
-    $jorge = new Usuario("jorge",2);
-
-    $leilao->propoe(new Lance($jonas, 700));
-    $leilao->propoe(new Lance($jorge, 500));
-
-    $leiloeiro = new Avaliador();
-    $leiloeiro->pegaOsMaioresNo($leilao);
-    $maiores = $leiloeiro->getTresMaiores();
+    $this->leiloeiro->pegaOsMaioresNo($leilao);
+    $maiores = $this->leiloeiro->getTresMaiores();
 
     $this->assertEquals($maiorEsperado1, $maiores[0]->getValor(), 0.0001);
     $this->assertEquals($maiorEsperado2, $maiores[1]->getValor(), 0.0001);
   }
 
-  public function testAceitaLeilaoSemLancesRetornaVazio(){
+  /**
+  * @expectedException Exception
+  */
+  public function testNaoDeveAvaliarLeiloesSemNenhumLanceDado(){
 
-    $retornoEsperado = array();
-    $leilao = new Leilao("Playstation");
+    $criador = new CriadorDeLeilao();
+    $leilao = $this->criador->para("Playstation 3 Novo")->constroi();
 
-    $leiloeiro = new Avaliador();
-    $leiloeiro->pegaOsMaioresNo($leilao);
-    $maiores = $leiloeiro->getTresMaiores();
-
-    $this->assertEquals($retornoEsperado, $maiores, 0.0001);
+    $this->leiloeiro->avalia($leilao);
   }
 }
  ?>

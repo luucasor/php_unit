@@ -17,6 +17,11 @@
 
     public function avalia(Leilao $leilao){
       $total = 0;
+      
+      if(count($leilao->getLances()) <= 0) {
+        throw new Exception("Um leilão precisa ter pelo menos um lance");
+      }
+
       foreach ($leilao->getLances() as $lance) {
         if($lance->getValor() > $this->maiorValor){
             $this->maiorValor = $lance->getValor();
